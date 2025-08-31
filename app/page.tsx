@@ -1,5 +1,7 @@
 "use client";
 import { useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
 import Navbar from '../components/Navbar';
 import UploadForm from '../components/UploadForm';
 import Filter from '../components/Filter';
@@ -69,8 +71,12 @@ export default function Home() {
   const [searching, setSearching] = useState(false);
   const [searched, setSearched] = useState(false);
 
+  const [resultsRef, resultsInView] = useInView({
+    triggerOnce: true,
+    threshold: 0.1
+  });
+
   const inferredColor = useMemo(() => {
-    // Prefer Azure color dominantColors
     const azureColor = analysis?.color?.dominantColors?.[0];
     return azureColor ? azureColor : (dominantColor || null);
   }, [analysis, dominantColor]);
@@ -121,7 +127,6 @@ export default function Home() {
     setResults([]);
     setSaveMessage(null);
     try {
-      // Use enhanced data if available, otherwise fall back to basic analysis
       const enhancedData = analysis?.enhancedData;
       const keywords: string[] = [];
       const tags: string[] = enhancedData?.tags || analysis?.tags?.map((t: any) => t.name).slice(0, 10) || [];
@@ -163,7 +168,6 @@ export default function Home() {
     try {
       const form = new FormData();
       
-      // Use enhanced data if available, otherwise fall back to inferred data
       const enhancedData = analysis?.enhancedData;
       const name = enhancedData?.name || inferredName;
       const category = enhancedData?.category || inferredCategory || 'Accessories';
@@ -201,9 +205,10 @@ export default function Home() {
   const filteredResults = results.filter(r => r.similarity >= minScore);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <Navbar />
-      <main className="max-w-5xl mx-auto p-4">
+      
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <UploadForm
           image={image}
           setImage={setImage}
@@ -218,19 +223,112 @@ export default function Home() {
           onSave={saveToDb}
           analyzing={analyzing}
         />
-        <div className="my-6">
-          <Filter value={minScore} setValue={setMinScore} />
-        </div>
-        {loading && <LoadingSpinner />}
-        {error && <ErrorMessage message={error} />}
-        {saveMessage && (
-          <div className="mt-2 text-green-700 bg-green-100 border border-green-200 px-3 py-2 rounded">{saveMessage}</div>
-        )}
-        {!loading && searched && filteredResults.length === 0 && (
-          <div className="mt-4 text-gray-700 bg-white border border-gray-200 px-4 py-3 rounded text-center">No similar products found.</div>
-        )}
-        <ResultsGrid products={filteredResults} />
+
+        {/* Filter Section */}
+        <AnimatePresence>
+          {analyzed && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5 }}
+              className="my-8"
+            >
+              <Filter value={minScore} setValue={setMinScore} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Loading and Error States */}
+        <AnimatePresence>
+          {loading && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.3 }}
+              className="my-8"
+            >
+              <LoadingSpinner />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="my-8"
+            >
+              <ErrorMessage message={error} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {saveMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="my-8"
+            >
+              <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3 text-green-700">
+                {saveMessage}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* No Results Message */}
+        <AnimatePresence>
+          {!loading && searched && filteredResults.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="my-8"
+            >
+              <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl px-6 py-8 text-center">
+                <div className="text-gray-500 text-lg mb-2">No similar products found</div>
+                <p className="text-gray-400">Try adjusting the similarity threshold or upload a different image</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Results Grid */}
+        <motion.div
+          ref={resultsRef}
+          initial={{ opacity: 0, y: 30 }}
+          animate={resultsInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="my-8"
+        >
+          <ResultsGrid products={filteredResults} />
+        </motion.div>
       </main>
+
+      {/* Footer */}
+      <motion.footer
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 1 }}
+        className="bg-white/80 backdrop-blur-sm border-t border-gray-200 mt-16"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center text-gray-500">
+            <p className="text-sm">
+              Powered by Google Gemini AI • Built with Next.js and Tailwind CSS
+            </p>
+          </div>
+        </div>
+      </motion.footer>
     </div>
   );
 }
