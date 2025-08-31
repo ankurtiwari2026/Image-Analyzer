@@ -1,4 +1,4 @@
-# Visual Product Matcher - Technical Assessment Project
+# Visual Product Matcher and Analyzer - Technical Assessment Project by Unthinkable
 
 ## 🚀 Project Overview
 
@@ -6,7 +6,7 @@ A web application that helps users find visually similar products based on uploa
 
 **Project Challenge**: Build a web application that helps users find visually similar products based on uploaded images.
 
-**Live Demo**: [🌐 View Live Application](https://image.onrender.com/)
+**Live Demo**: [🌐 View Live Application](https://image-analyzer-obc7.onrender.com)
 **GitHub Repository**: [📁 View Source Code](https://github.com/ankurtiwari2026/Image-Analyzer)
 
 ## ✨ Required Features (Assignment Compliance)
@@ -243,6 +243,9 @@ This project is ready for deployment on any free hosting service as required by 
 - **Netlify**: Great for static sites with serverless functions
 - **Railway**: Good for full-stack applications with database
 
+## **Demo pic**
+-**https://ibb.co/S7MXXZqP** 
+
 ### **Quick Deploy to Render (Currently Used)**
 ```bash
 # Connect your GitHub repository to Render
@@ -254,7 +257,7 @@ This project is ready for deployment on any free hosting service as required by 
 # 6. Add environment variables and deploy
 ```
 
-**🌐 Live Demo**: [https://image-analyzer.onrender.com/](https://image-analyzer.onrender.com/)
+**🌐 Live Demo**: [https://image-analyzer-obc7.onrender.com](https://image-analyzer-obc7.onrender.com)
 
 ### **Quick Deploy to Vercel**
 ```bash
